@@ -30,17 +30,77 @@
 </form>
 
 <script>
-const OPENAI_KEY='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';
-const GPT_ENDPOINT='https://api.openai.com/v1/responses';
+const OPENAI_KEY = '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';
+const GPT_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
 
-const chatArea=document.getElementById('chatArea');
-function addMsg(text,from){const wrap=document.createElement('div');wrap.className=`max-w-md whitespace-pre-wrap leading-relaxed px-4 py-3 rounded-lg animate-fadeIn ${from==='user'?'self-end bg-purple-600 text-white':'bg-neutral-800'}`;wrap.innerHTML=marked.parse(text);chatArea.appendChild(wrap);chatArea.scrollTop=chatArea.scrollHeight;}
+const chatArea = document.getElementById('chatArea');
 
-async function askGPT(prompt){const body={model:'gpt-3.5-turbo',messages:[{role:'system',content:'You are XO AI, a helpful Indonesian assistant.'},{role:'user',content:prompt}],temperature:0.5};
-  const res=await fetch(GPT_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${OPENAI_KEY}`},body:JSON.stringify(body)});
-  const data=await res.json();return data.choices?.[0]?.message?.content?.trim()||'Maaf, terjadi kesalahan.';}
+function addMsg(text, from) {
+  const wrap = document.createElement('div');
+  wrap.className = `max-w-md whitespace-pre-wrap leading-relaxed px-4 py-3 rounded-lg animate-fadeIn ${
+    from === 'user' ? 'self-end bg-purple-600 text-white' : 'bg-neutral-800'
+  }`;
+  wrap.innerHTML = marked.parse(text);
+  chatArea.appendChild(wrap);
+  chatArea.scrollTop = chatArea.scrollHeight;
+  return wrap;
+}
 
-document.getElementById('chatForm').addEventListener('submit',async e=>{e.preventDefault();const q=document.getElementById('userInput').value.trim();if(!q)return;addMsg(q,'user');document.getElementById('userInput').value='';const placeholder=addMsg('⋯','bot');const ans=await askGPT(q);placeholder.innerHTML=marked.parse(ans);
+async function askGPT(prompt) {
+  const body = {
+    model: 'gpt-3.5-turbo',
+    messages: [
+      { role: 'system', content: 'You are XO AI, a helpful Indonesian assistant.' },
+      { role: 'user', content: prompt },
+    ],
+    temperature: 0.5,
+  };
+
+  const res = await fetch(GPT_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${OPENAI_KEY}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content?.trim() || 'Maaf, terjadi kesalahan.';
+}
+
+function typingAnimation(element, duration = 3000) {
+  const dots = ['⋯', '⋯⋯', '⋯⋯⋯'];
+  let i = 0;
+  element.innerHTML = dots[i];
+  const interval = setInterval(() => {
+    i = (i + 1) % dots.length;
+    element.innerHTML = dots[i];
+  }, 500);
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      clearInterval(interval);
+      resolve();
+    }, duration);
+  });
+}
+
+document.getElementById('chatForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const q = document.getElementById('userInput').value.trim();
+  if (!q) return;
+  addMsg(q, 'user');
+  document.getElementById('userInput').value = '';
+
+  const placeholder = addMsg('', 'bot');
+
+  // Jalankan animasi mengetik selama 3 detik
+  await typingAnimation(placeholder, 3000);
+
+  // Setelah animasi selesai, ambil jawaban GPT
+  const ans = await askGPT(q);
+  placeholder.innerHTML = marked.parse(ans);
 });
 </script>
 </body>
