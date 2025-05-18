@@ -56,29 +56,38 @@ async function askGPT(prompt) {
     temperature: 0.5,
   };
 
-  const res = await fetch(GPT_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${OPENAI_KEY}`,
-    },
-    body: JSON.stringify(body),
-  });
+  try {
+    const res = await fetch(GPT_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${OPENAI_KEY}`,
+      },
+      body: JSON.stringify(body),
+    });
 
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content?.trim() || 'Maaf, terjadi kesalahan.';
+    if (!res.ok) {
+      const errorData = await res.json();
+      return `Error: ${errorData.error?.message || res.statusText}`;
+    }
+
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content?.trim() || 'Maaf, terjadi kesalahan.';
+  } catch (e) {
+    return `Error jaringan: ${e.message}`;
+  }
 }
 
 function typingAnimation(element, duration = 3000) {
-  const dots = ['⋯', '⋯⋯', '⋯⋯⋯'];
+  const symbols = ['●', '●●', '●●●'];
   let i = 0;
-  element.innerHTML = dots[i];
-  const interval = setInterval(() => {
-    i = (i + 1) % dots.length;
-    element.innerHTML = dots[i];
-  }, 500);
-
+  element.textContent = '';
   return new Promise((resolve) => {
+    const interval = setInterval(() => {
+      element.textContent = symbols[i];
+      i = (i + 1) % symbols.length;
+    }, 500);
+
     setTimeout(() => {
       clearInterval(interval);
       resolve();
@@ -93,12 +102,13 @@ document.getElementById('chatForm').addEventListener('submit', async (e) => {
   addMsg(q, 'user');
   document.getElementById('userInput').value = '';
 
+  // Tambahkan placeholder kosong dulu untuk animasi ketik bot
   const placeholder = addMsg('', 'bot');
 
-  // Jalankan animasi mengetik selama 3 detik
+  // Jalankan animasi mengetik selama 3 detik dengan titik-titik lingkaran
   await typingAnimation(placeholder, 3000);
 
-  // Setelah animasi selesai, ambil jawaban GPT
+  // Setelah animasi selesai, tampilkan jawaban GPT
   const ans = await askGPT(q);
   placeholder.innerHTML = marked.parse(ans);
 });
