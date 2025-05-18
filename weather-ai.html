@@ -3,45 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chat AI Cuaca Jabodetabek</title>
+  <title>XO AI • Beta</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
+    :root{color-scheme:dark}
+    body{background:#0f0f10;color:#e5e5e5}
+    @keyframes pulseBadge{0%,100%{opacity:.4}50%{opacity:1}}
+    .badge-pulse{animation:pulseBadge 2s ease-in-out infinite}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-    .animate-fadeIn{animation:fadeIn .3s ease-in}
+    .animate-fadeIn{animation:fadeIn .3s ease}
   </style>
 </head>
-<body class="bg-sky-50 flex flex-col min-h-screen">
-<header class="bg-sky-700 text-white py-4 px-4 flex items-center justify-between shadow">
-  <h1 class="text-lg font-semibold">Chat AI Cuaca Jabodetabek (BETA)</h1>
-  <a href="index.html" class="text-sm underline">← Info Cuaca</a>
+<body class="flex flex-col min-h-screen font-sans">
+<header class="border-b border-neutral-800 p-3 flex items-center gap-3">
+  <div class="w-5 h-5 rounded-full bg-gradient-to-br from-sky-400 via-purple-500 to-fuchsia-500 animate-pulse"></div>
+  <h1 class="text-lg font-semibold">XO AI</h1>
+  <span class="text-xs bg-purple-700/30 px-2 py-0.5 rounded-md badge-pulse">Beta</span>
 </header>
-<main class="flex-1 overflow-y-auto p-4" id="chatArea"></main>
-<form id="chatForm" class="p-4 bg-white shadow-inner flex gap-2">
-  <input id="userInput" type="text" placeholder="Tanyakan cuaca..." class="flex-1 border rounded-lg p-2" />
-  <button class="bg-sky-600 text-white px-4 py-2 rounded-lg">Kirim</button>
+<main id="chatArea" class="flex-1 overflow-y-auto p-4 flex flex-col gap-4"></main>
+<form id="chatForm" class="border-t border-neutral-800 p-3 flex items-center gap-2 bg-neutral-900/60 backdrop-blur-md">
+  <input id="userInput" autocomplete="off" placeholder="Ketik pesan atau unggah gambar…" class="flex-1 bg-neutral-800 text-sm px-4 py-2 rounded-full focus:outline-none" />
+  <button class="bg-purple-600 hover:bg-purple-500 transition-colors text-white rounded-full p-2" aria-label="Kirim">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
+  </button>
 </form>
 
 <script>
-const OPENAI_KEY = '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';
-const WEATHER_KEY = '87128f7df57c93e129bd675c4772c1cc';
-const REGIONS = ['Jakarta','Bogor','Depok','Tangerang','Bekasi'];
-const chatArea=document.getElementById('chatArea');
-function addMsg(text,from){const div=document.createElement('div');div.className=`my-2 p-3 rounded-lg ${from==='user'?'bg-sky-100 self-end':'bg-white'}`;div.innerHTML=marked.parse(text);chatArea.appendChild(div);chatArea.scrollTop=chatArea.scrollHeight;}
-async function fetchWeather(region){const coords={Jakarta:[-6.2146,106.8451],Bogor:[-6.595,106.8166],Depok:[-6.4025,106.7942],Tangerang:[-6.1702,106.6319],Bekasi:[-6.2349,106.9896]}[region];const r=await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${coords[0]}&lon=${coords[1]}&units=metric&appid=${WEATHER_KEY}&lang=id`);return await r.json();}
-async function aiReply(prompt){const sys=`Kamu adalah asisten cuaca untuk wilayah Jabodetabek (Jakarta, Bogor, Depok, Tangerang, Bekasi). Jawab singkat (≤ 2 kalimat) dan ramah.`;
-const body={model:'gpt-3.5-turbo',messages:[{role:'system',content:sys},{role:'user',content:prompt}],temperature:0.4};
-const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${OPENAI_KEY}`},body:JSON.stringify(body)});
-const data=await res.json();return data.choices?.[0]?.message?.content?.trim();}
+const OPENAI_KEY='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';
+const GPT_ENDPOINT='https://api.openai.com/v1/chat/completions';
 
-document.getElementById('chatForm').addEventListener('submit',async e=>{e.preventDefault();const q=document.getElementById('userInput').value.trim();if(!q)return;addMsg(q,'user');document.getElementById('userInput').value='';addMsg('⋯','bot');
-const last=chatArea.lastChild;
-let answer;
-try{
-  const region=REGIONS.find(r=>q.toLowerCase().includes(r.toLowerCase()));
-  if(region){const w=await fetchWeather(region);answer=`Cuaca di **${region}** sekarang *${w.weather[0].description}*, suhu **${Math.round(w.main.temp)}°C**.`;}else{answer=await aiReply(q);} 
-}catch(e){answer='Maaf, terjadi kesalahan mengambil data.';}
-last.innerHTML=marked.parse(answer);
+const chatArea=document.getElementById('chatArea');
+function addMsg(text,from){const wrap=document.createElement('div');wrap.className=`max-w-md whitespace-pre-wrap leading-relaxed px-4 py-3 rounded-lg animate-fadeIn ${from==='user'?'self-end bg-purple-600 text-white':'bg-neutral-800'}`;wrap.innerHTML=marked.parse(text);chatArea.appendChild(wrap);chatArea.scrollTop=chatArea.scrollHeight;}
+
+async function askGPT(prompt){const body={model:'gpt-3.5-turbo',messages:[{role:'system',content:'You are XO AI, a helpful Indonesian assistant.'},{role:'user',content:prompt}],temperature:0.5};
+  const res=await fetch(GPT_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${OPENAI_KEY}`},body:JSON.stringify(body)});
+  const data=await res.json();return data.choices?.[0]?.message?.content?.trim()||'Maaf, terjadi kesalahan.';}
+
+document.getElementById('chatForm').addEventListener('submit',async e=>{e.preventDefault();const q=document.getElementById('userInput').value.trim();if(!q)return;addMsg(q,'user');document.getElementById('userInput').value='';const placeholder=addMsg('⋯','bot');const ans=await askGPT(q);placeholder.innerHTML=marked.parse(ans);
 });
 </script>
 </body>
