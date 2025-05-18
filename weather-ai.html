@@ -31,7 +31,7 @@
 
 <script>
 const OPENAI_KEY='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';
-const GPT_ENDPOINT='https://api.openai.com/v1/chat/completions';
+const GPT_ENDPOINT='https://api.openai.com/v1/responses';
 
 const chatArea=document.getElementById('chatArea');
 function addMsg(text,from){const wrap=document.createElement('div');wrap.className=`max-w-md whitespace-pre-wrap leading-relaxed px-4 py-3 rounded-lg animate-fadeIn ${from==='user'?'self-end bg-purple-600 text-white':'bg-neutral-800'}`;wrap.innerHTML=marked.parse(text);chatArea.appendChild(wrap);chatArea.scrollTop=chatArea.scrollHeight;}
