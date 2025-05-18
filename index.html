@@ -10,7 +10,7 @@
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideIn{from{transform:translateX(-100%);}to{transform:translateX(0);}}
 @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-.loader{border:6px solid #e2e8f0;border-top-color:#0ea5e9;border-radius:50%;width:60px;height:60px;animation:spin 10s linear infinite}
+.loader{border:6px solid #e2e8f0;border-top-color:#0ea5e9;border-radius:50%;width:60px;height:60px;animation:spin 1s linear infinite}
 .animate-fadeIn{animation:fadeIn .5s ease-in-out}
 .animate-slideIn{animation:slideIn .4s ease-out}
 .focus{background-color:#38bdf8!important;color:#fff}
@@ -56,7 +56,7 @@
 <script>
 const REGIONS=[{name:"Jakarta",lat:-6.2146,lon:106.8451},{name:"Bogor",lat:-6.595,lon:106.8166},{name:"Depok",lat:-6.4025,lon:106.7942},{name:"Tangerang",lat:-6.1702,lon:106.6319},{name:"Bekasi",lat:-6.2349,lon:106.9896}];
 const API_KEY='87128f7df57c93e129bd675c4772c1cc';let currentRegionIndex=0;
-window.addEventListener('load',()=>{setTimeout(()=>document.getElementById('preloader').classList.add('hidden'),800);});
+window.addEventListener('load',()=>{setTimeout(()=>document.getElementById('preloader').classList.add('hidden'),10000);});
 function updateClock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('id-ID');}
 setInterval(updateClock,1000);updateClock();
 const hamburger=document.getElementById('hamburger');const sidebar=document.getElementById('regionSidebar');const overlay=document.getElementById('overlay');
